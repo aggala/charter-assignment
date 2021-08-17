@@ -1,0 +1,49 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+  <meta charset="UTF-8">
+  <title>Customers</title>
+  <h1>Customers</h1>
+</head>
+<body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script  th:inline="javascript">
+    /*<![CDATA[*/
+    // $(document).ready(function () {
+    //   $('#createNewCustButton').click(
+    //       function () {
+    //         console.log("button click");
+    //         alert("button click");
+    //       }
+    //   );
+    // });
+    /*]]>*/
+  </script>
+  <form method="post" th:action="@{/addCustomer}" th:object="${customer}" id="newCustomerForm">
+    <label>Customer Name</label>
+    <input type="text" name="name" id="name" th:field="*{name}"/>
+    <input type="submit" id="createNewCustButton" name="createNewCustButton" value="Submit" />
+  </form>
+  <p/>
+  <table>
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>Number of Transactions</th>
+        <th>View All Transactions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="customer : ${customers}">
+        <td><a th:href="@{/transactions/{customerId}(customerId=${customer.id})}" th:text="${customer.id}"></a></td>
+        <td th:text="${customer.name}"/>
+        <td th:text="${#lists.size(customer.transactions)}"/>
+        <td><input type="button" value="View" th:onclick="|window.location.href='@{/transactions/{customerId}(customerId=${customer.id})}'|" /> </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

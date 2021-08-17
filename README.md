@@ -1,4 +1,4 @@
-# fast-charter-assignment
+# Charter Assignment
 ** Coding assignment
 
  

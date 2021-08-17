@@ -1,20 +1,33 @@
-package service;
+package com.charterassignment.service;
 
-import Entity.Transaction;
+import com.charterassignment.entity.Customer;
+import com.charterassignment.entity.Transaction;
+import com.charterassignment.repository.CustomerRepository;
+import com.charterassignment.repository.TransactionRepository;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class TransactionService {
 
-  /**
-   * If this app were connected to database and running as a service, this method would get all
-   * transactions for current or month chosen.
-   * In this instance I will be filtering transactions from list of all transactions.
-   * @param allTransactions List of all transactions.
-   * @param month           Month for which reward is supposed to be fetched.
-   * @return                Total reward for the given month.
-   */
+  @Autowired
+  TransactionRepository transactionRepository;
+  @Autowired
+  CustomerRepository customerRepository;
+
+  public TransactionService() {
+
+  }
+
+  public List<Transaction> getTransactions(Long customerId) {
+    Customer customer = customerRepository.getOne(customerId);
+    return customer.getTransactions();
+  }
+
   public Integer calculateMonthlyReward(List<Transaction> allTransactions, Integer month) {
     int monthlyReward = 0;
 
@@ -32,7 +45,7 @@ public class TransactionService {
 
     for (Transaction transaction : allTransactions) {
       if (transaction.getTransactionDate().getMonthValue() == month) {
-        totalAmountSpent += transaction.getTransactionAmt();
+        totalAmountSpent += transaction.getTransactionAmount();
       }
     }
 
@@ -75,6 +88,19 @@ public class TransactionService {
   public Integer calculateTotalReward(List<Transaction> allTransactions) {
 
     return allTransactions.stream().mapToInt(Transaction::getReward).sum();
+
+  }
+
+  public void addTransaction( Long customerId, LocalDate transactionDate, Double transactionAmount) {
+    Customer customer = customerRepository.getOne(customerId);
+    Transaction transaction = new Transaction();
+    transaction.setTransactionAmount(transactionAmount);
+    transaction.setTransactionDate(transactionDate);
+    customer.addTransaction(transaction);
+    transaction.setCustomer( customer);
+
+    customerRepository.save(customer);
+    transactionRepository.save(transaction);
 
   }
 }

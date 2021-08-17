@@ -1,0 +1,89 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Transactions</title>
+  <h1>Transactions for <span th:text="${customerId}"/> </h1>
+</head>
+<body>
+<script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  $(document).ready(function () {
+    $('form#monthSelector').submit(function (event) {
+      event.preventDefault();
+      let monthNumber = Number(document.getElementById("month").value);
+
+      let transactions = /*[[${transactions}]]*/ [];
+      let monthlyReward = 0;
+      for (let i=0 ; i<transactions.length ; i++ ) {
+        let transactionDate = new Date(transactions[i].transactionDate+"T00:00:00");
+        console.log("transaction num: " + i + " transaction date " +transactionDate.getMonth() );
+        console.log("month number" + typeof monthNumber);
+        if (transactionDate.getMonth() === monthNumber) {
+
+          monthlyReward = monthlyReward + transactions[i].reward;
+        }
+      }
+      let monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      document.getElementById("monthlyReward").innerHTML = "Reward earned for the month of " + monthNames[monthNumber] +
+        " is " + monthlyReward +" points";
+    });
+  });
+</script>
+
+<p>Add new Transactions</p>
+<form method="post" th:action="@{/transactions/addTransaction}" id="newTransactionForm">
+  <label>Customer Id</label>
+  <input type="text" th:name="customerId" id="customerId" th:value="${customerId}"><br/>
+  <label>Transaction Date:</label>
+  <input type="date" th:name="transactionDate" id="transactionDate"/><br/>
+  <lable>Transaction Amount:</lable>
+  <input type="number" th:name="transactionAmount" id="transactionAmount"/><br/>
+  <input type="submit" id="addNewTransactionButton" name="addNewTransactionButton" value="Submit" />
+</form>
+
+<p/>
+<p>Reward Earned For Month:</p>
+<form id="monthSelector">
+  <label>select month:</label>
+  <select id="month">
+    <option value="0">January</option>
+    <option value="1">February</option>
+    <option value="2">March</option>
+    <option value="3">April</option>
+    <option value="4">May</option>
+    <option value="5">June</option>
+    <option value="6">July</option>
+    <option value="7">August</option>
+    <option value="8">September</option>
+    <option value="9">October</option>
+    <option value="10">November</option>
+    <option value="11">December</option>
+  </select>
+  <input type="submit" value="Submit" />
+</form>
+<p id="monthlyReward"></p>
+<table>
+  <thead>
+  <tr>
+    <th>id</th>
+    <th>Transaction Date</th>
+    <th>Transaction Amount</th>
+    <th>Reward Earned</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="transaction : ${transactions}">
+    <td th:text="${transaction.id}"></td>
+    <td th:text="${transaction.transactionDate}"/>
+    <td th:text="${transaction.transactionAmount}"/>
+    <td th:text="${transaction.reward}"/>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>
