@@ -16,29 +16,48 @@
 
 <script th:inline="javascript">
   /*<![CDATA[*/
-  $(document).ready(function () {
-    $('form#monthSelector').submit(function (event) {
-      event.preventDefault();
-      let monthNumber = Number(document.getElementById("month").value);
 
-      let transactions = /*[[${transactions}]]*/ [];
-      let monthlyReward = 0;
-      for (let i = 0; i < transactions.length; i++) {
-        let transactionDate = new Date(transactions[i].transactionDate + "T00:00:00");
-        console.log("transaction num: " + i + " transaction date " + transactionDate.getMonth());
-        console.log("month number" + typeof monthNumber);
-        if (transactionDate.getMonth() === monthNumber) {
+  window.onload = function () {
+    let monthlyMap = new Map();
+    let transactions = /*[[${transactions}]]*/ [];
+    let totalReward = 0;
+    let totalSpend = 0;
 
-          monthlyReward = monthlyReward + transactions[i].reward;
+    for (let i = 0 ; i < transactions.length ; i++) {
+      totalReward = totalReward + transactions[i].reward;
+      totalSpend = totalSpend + transactions[i].transactionAmount;
+      let transactionDate = new Date(transactions[i].transactionDate+"T00:00:00");
+      let transMonth = transactionDate.getMonth();
+      let monthReward = monthlyMap.has(transMonth) ?
+          monthlyMap.get(transMonth)[1] + Number(transactions[i].reward) : Number(transactions[i].reward);
+      let monthSpend = monthlyMap.has(transMonth) ?
+          monthlyMap.get(transMonth)[0] + Number(transactions[i].transactionAmount) : Number(transactions[i].transactionAmount);
+      monthlyMap.set(transactionDate.getMonth(), [monthSpend, monthReward]);
+    }
+
+    let monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December'];
+
+    let tbodyElement = document.getElementById('monthlyTBody');
+    if (monthlyMap.size > 0){
+      for (let i = 0 ; i < 12 ; i++) {
+        if (monthlyMap.has(i)) {
+          tbodyElement.innerHTML = tbodyElement.innerHTML + "<tr>" +
+              "<td>" + monthNames[i] + "</td>" +
+              "<td>" + monthlyMap.get(i)[0] + "</td>" +
+              "<td>" + monthlyMap.get(i)[1] + "</td>" +
+              "</tr>\n";
         }
       }
-      let monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
-        'September', 'October', 'November', 'December'];
-      document.getElementById("monthlyReward").innerHTML = "Reward earned for the month of "
-          + monthNames[monthNumber] +
-          " is " + monthlyReward + " points";
-    });
-  });
+    }
+    let totalSpendEle = document.getElementById("totalSpend");
+    totalSpendEle.innerHTML = "Total Amount Spent: $" + totalSpend;
+    let totalRewardEle = document.getElementById("totalReward");
+    totalRewardEle.innerHTML = "Total Reward Earned: " + totalReward;
+  };
+  /*]]>*/
+
+
 </script>
 <div class="container">
   <h1>Transactions for <span th:text="${customerName}"/></h1>
@@ -66,60 +85,55 @@
       </div>
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-          <input type="submit" id="addNewTransactionButton" name="addNewTransactionButton" value="Submit"/>
+          <input class="btn btn-primary" type="submit" id="addNewTransactionButton" name="addNewTransactionButton" value="Submit"/>
         </div>
       </div>
     </form>
 
-    <p/>
-    <h4>Monthly Reward</h4>
-    <form class="form-horizontal" id="monthSelector">
-      <div class="form-group">
-        <label class="col-sm-2 control-label" for="month">Select Month:</label>
-        <div class="col-sm-10">
-          <select class="form-control" id="month">
-            <option value="0">January</option>
-            <option value="1">February</option>
-            <option value="2">March</option>
-            <option value="3">April</option>
-            <option value="4">May</option>
-            <option value="5">June</option>
-            <option value="6">July</option>
-            <option value="7">August</option>
-            <option value="8">September</option>
-            <option value="9">October</option>
-            <option value="10">November</option>
-            <option value="11">December</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <input type="submit" value="Submit"/>
-        </div>
-      </div>
-    </form>
+    <p id="totalSpend"></p>
+    <p id="totalReward"></p>
 
-    <p id="monthlyReward"></p>
+    <ul class="nav nav-tabs">
+      <li class="active"><a data-toggle="tab" href="#all">All</a></li>
+      <li><a data-toggle="tab" href="#monthly">Monthly</a></li>
+    </ul>
 
-    <table class="table">
-      <thead>
-      <tr>
-        <th>id</th>
-        <th>Transaction Date</th>
-        <th>Transaction Amount</th>
-        <th>Reward Earned</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="transaction : ${transactions}">
-        <td th:text="${transaction.id}"></td>
-        <td th:text="${transaction.transactionDate}"/>
-        <td th:text="${transaction.transactionAmount}"/>
-        <td th:text="${transaction.reward}"/>
-      </tr>
-      </tbody>
-    </table>
+    <div class="tab-content">
+      <div id="all" class="tab-pane active">
+        <table id="allTransactions" class="table">
+          <thead>
+          <tr>
+            <th>id</th>
+            <th>Transaction Date</th>
+            <th>Transaction Amount ($)</th>
+            <th>Reward Earned</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="transaction : ${transactions}">
+            <td th:text="${transaction.id}"></td>
+            <td th:text="${transaction.transactionDate}"/>
+            <td th:text="${transaction.transactionAmount}"/>
+            <td th:text="${transaction.reward}"/>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="monthly" class="tab-pane">
+        <table id="montlyTransactions" class="table">
+          <thead>
+          <tr>
+            <th>Month</th>
+            <th>Total Amount Spent ($)</th>
+            <th>Total Rewards</th>
+          </tr>
+          </thead>
+          <tbody id="monthlyTBody">
+
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 </body>

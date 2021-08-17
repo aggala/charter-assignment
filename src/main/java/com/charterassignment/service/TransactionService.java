@@ -27,51 +27,12 @@ public class TransactionService {
     return transactionRepository.findAllByCustomerIdOrderById(customerId);
   }
 
-  public Integer calculateMonthlyReward(List<Transaction> allTransactions, Integer month) {
-    int monthlyReward = 0;
+  public Map<Integer, Integer> totalRewardGroupedByMonth(Long customerId) {
 
-    for (Transaction transaction : allTransactions) {
-      if (transaction.getTransactionDate().getMonthValue() == month) {
-        monthlyReward += transaction.getReward();
-      }
-    }
-
-    return monthlyReward;
-  }
-
-  public Double totalAmountSpentInMonth (List<Transaction> allTransactions, Integer month) {
-    Double totalAmountSpent = 0.0d;
-
-    for (Transaction transaction : allTransactions) {
-      if (transaction.getTransactionDate().getMonthValue() == month) {
-        totalAmountSpent += transaction.getTransactionAmount();
-      }
-    }
-
-    return totalAmountSpent;
-  }
-
-  public Integer rewardForAmount (Double amount) {
-    if (amount > 100) {
-      return ((int)Math.floor(amount) - 100) * 2 + 50;
-    }
-
-    if (amount > 50) {
-      return  (int)Math.floor(amount) - 50;
-    }
-
-    return 0;
-  }
-
-  /**
-   * Gets rewards earned each month.
-   * @param allTransactions
-   * @return
-   */
-  public Map<Integer, Integer> totalRewardGroupedByMonth(List<Transaction> allTransactions) {
+    List<Transaction> transactions = transactionRepository.findAllByCustomerIdOrderById(customerId);
     Map<Integer, Integer> rewardGroupedByMonth = new HashMap<>();
 
-    for (Transaction transaction : allTransactions) {
+    for (Transaction transaction : transactions) {
       Integer monthValue = transaction.getTransactionDate().getMonthValue();
       if (rewardGroupedByMonth.containsKey(monthValue)) {
         Integer updatedReward = rewardGroupedByMonth.get(monthValue) + transaction.getReward();
@@ -84,10 +45,12 @@ public class TransactionService {
     return rewardGroupedByMonth;
   }
 
-  public Integer calculateTotalReward(List<Transaction> allTransactions) {
+  public Double calculateTotalSpent (Long customerId) {
+    return transactionRepository.totalAmountSpendByCustomer(customerId);
+  }
 
-    return allTransactions.stream().mapToInt(Transaction::getReward).sum();
-
+  public Integer calculateTotalReward(Long customerId) {
+    return transactionRepository.totalRewardEarnedByCustomer(customerId);
   }
 
   public void addTransaction( Long customerId, LocalDate transactionDate, Double transactionAmount) {
