@@ -1,6 +1,8 @@
 package com.charterassignment.controller;
 
+import com.charterassignment.entity.Customer;
 import com.charterassignment.entity.Transaction;
+import com.charterassignment.service.CustomerService;
 import com.charterassignment.service.TransactionService;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -21,18 +23,22 @@ import org.springframework.web.servlet.ModelAndView;
 public class TransactionController {
 
   TransactionService transactionService;
+  CustomerService customerService;
 
   @Autowired
-  public TransactionController(TransactionService transactionService) {
+  public TransactionController(TransactionService transactionService, CustomerService customerService) {
     this.transactionService = transactionService;
+    this.customerService = customerService;
   }
 
   @GetMapping("/{customerId}")
   public ModelAndView getTransactions(@PathVariable Long customerId) {
+    Customer customer = customerService.getCustomer(customerId);
     List<Transaction> transactions = transactionService.getTransactions(customerId);
     Map<String, Object> model = new HashMap<>();
     model.put("transactions", transactions);
     model.put("customerId", customerId);
+    model.put("customerName", customer.getName());
     return new ModelAndView("transactions", model);
 
   }

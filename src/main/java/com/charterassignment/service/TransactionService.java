@@ -14,18 +14,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class TransactionService {
 
-  @Autowired
   TransactionRepository transactionRepository;
-  @Autowired
   CustomerRepository customerRepository;
 
-  public TransactionService() {
-
+  @Autowired
+  public TransactionService(TransactionRepository transactionRepository, CustomerRepository customerRepository) {
+    this.transactionRepository = transactionRepository;
+    this.customerRepository = customerRepository;
   }
 
   public List<Transaction> getTransactions(Long customerId) {
-    Customer customer = customerRepository.getOne(customerId);
-    return customer.getTransactions();
+    return transactionRepository.findAllByCustomerIdOrderById(customerId);
   }
 
   public Integer calculateMonthlyReward(List<Transaction> allTransactions, Integer month) {

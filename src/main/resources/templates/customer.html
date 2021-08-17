@@ -3,47 +3,52 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.thymeleaf.org ">
 <head>
+  <script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+  <script th:src="@{/js/bootstrap.js}"></script>
+  <link rel="stylesheet" th:href="@{/css/bootstrap.css}"/>
+
   <meta charset="UTF-8">
   <title>Customers</title>
-  <h1>Customers</h1>
+
 </head>
 <body>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script  th:inline="javascript">
-    /*<![CDATA[*/
-    // $(document).ready(function () {
-    //   $('#createNewCustButton').click(
-    //       function () {
-    //         console.log("button click");
-    //         alert("button click");
-    //       }
-    //   );
-    // });
-    /*]]>*/
-  </script>
-  <form method="post" th:action="@{/addCustomer}" th:object="${customer}" id="newCustomerForm">
-    <label>Customer Name</label>
-    <input type="text" name="name" id="name" th:field="*{name}"/>
-    <input type="submit" id="createNewCustButton" name="createNewCustButton" value="Submit" />
+<div class="container">
+  <h1>Customers</h1>
+  <div class="panel-body">
+
+  <form class="form-horizontal" method="post" th:action="@{/addCustomer}" th:object="${customer}" id="newCustomerForm">
+    <div class="form-group">
+      <label class="col-sm-2 control-label" for="name">Customer Name</label>
+      <div class="col-sm-10">
+        <input class="form-control" type="text" name="name" id="name" th:field="*{name}"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <input class="btn btn-primary" type="submit" id="createNewCustButton" name="createNewCustButton" value="Submit" />
+      </div>
+    </div>
   </form>
   <p/>
-  <table>
+  <table class="table">
     <thead>
-      <tr>
-        <th>id</th>
-        <th>name</th>
-        <th>Number of Transactions</th>
-        <th>View All Transactions</th>
-      </tr>
+    <tr>
+      <th>id</th>
+      <th>name</th>
+      <th>Number of Transactions</th>
+      <th>View All Transactions</th>
+    </tr>
     </thead>
     <tbody>
-      <tr th:each="customer : ${customers}">
-        <td><a th:href="@{/transactions/{customerId}(customerId=${customer.id})}" th:text="${customer.id}"></a></td>
-        <td th:text="${customer.name}"/>
-        <td th:text="${#lists.size(customer.transactions)}"/>
-        <td><input type="button" value="View" th:onclick="|window.location.href='@{/transactions/{customerId}(customerId=${customer.id})}'|" /> </td>
-      </tr>
+    <tr th:each="customer : ${customers}">
+      <td><a th:href="@{/transactions/{customerId}(customerId=${customer.id})}" th:text="${customer.id}"></a></td>
+      <td th:text="${customer.name}"/>
+      <td th:text="${#lists.size(customer.transactions)}"/>
+      <td><input type="button" value="View" th:onclick="|window.location.href='@{/transactions/{customerId}(customerId=${customer.id})}'|" /> </td>
+    </tr>
     </tbody>
   </table>
+  </div>
+</div>
 </body>
 </html>
